@@ -1,0 +1,16 @@
+project:
+  name: actuaria-analytics
+
+data:
+  state: RJ
+  start_year: 2000
+  end_year: 2026
+
+population:
+  source: IBGE
+
+mortality:
+  source: DATASUS
+
+pipeline:
+  timezone: America/Sao_Paulo
