@@ -1,16 +1,73 @@
 project:
   name: actuaria-analytics
 
+
 data:
-  state: RJ
-  start_year: 2000
-  end_year: 2026
+
+  states:
+
+    - RJ
+    - SP
+    - MG
+    - ES
+
+
+  historical:
+
+    start_year: 2000
+
+    end_year: 2026
+
+
+  projection:
+
+    enabled: true
+
+    horizon_year: 2070
+
+
+  sexes:
+
+    - M
+    - F
+
+
+  age_groups:
+
+    - 00-04
+    - 05-09
+    - 10-14
+    - 15-19
+    - 20-24
+    - 25-29
+    - 30-34
+    - 35-39
+    - 40-44
+    - 45-49
+    - 50-54
+    - 55-59
+    - 60-64
+    - 65-69
+    - 70-74
+    - 75-79
+    - 80-84
+    - 85-89
+    - 90+
+
+
 
 population:
+
   source: IBGE
 
+
+
 mortality:
+
   source: DATASUS
 
+
+
 pipeline:
+
   timezone: America/Sao_Paulo

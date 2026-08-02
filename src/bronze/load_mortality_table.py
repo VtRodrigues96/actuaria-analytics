@@ -1,39 +1,41 @@
 from sqlalchemy import text
 
 from src.database.connection import get_engine
-from src.extract.ibge import extract_population_data
+from src.extract.ibge_mortality import extract_mortality_table
 
 
-def load_population():
+def load_mortality_table():
 
     engine = get_engine()
 
-    df = extract_population_data()
+    df = extract_mortality_table()
 
 
     insert_query = """
-    INSERT INTO bronze.population_raw
+    INSERT INTO bronze.mortality_table_raw
     (
-        reference_year,
-        state_code,
+        age,
         sex,
-        age_group,
-        population,
+        mortality_rate,
+        life_expectancy,
         source,
         ingestion_timestamp
     )
     VALUES
     (
-        :reference_year,
-        :state_code,
+        :age,
         :sex,
-        :age_group,
-        :population,
+        :mortality_rate,
+        :life_expectancy,
         :source,
         :ingestion_timestamp
     )
 
     ON CONFLICT
+    (
+        age,
+        sex
+    )
     DO NOTHING;
     """
 
@@ -45,11 +47,10 @@ def load_population():
             connection.execute(
                 text(insert_query),
                 {
-                    "reference_year": int(row["reference_year"]),
-                    "state_code": row["state_code"],
+                    "age": int(row["age"]),
                     "sex": row["sex"],
-                    "age_group": row["age_group"],
-                    "population": int(row["population"]),
+                    "mortality_rate": row["mortality_rate"],
+                    "life_expectancy": row["life_expectancy"],
                     "source": row["source"],
                     "ingestion_timestamp": row["ingestion_timestamp"]
                 }
@@ -57,10 +58,10 @@ def load_population():
 
 
     print(
-        f"Carga Bronze população IBGE finalizada: {len(df)} registros"
+        f"Carga Bronze mortalidade IBGE finalizada: {len(df)} registros"
     )
 
 
 if __name__ == "__main__":
 
-    load_population()
+    load_mortality_table()

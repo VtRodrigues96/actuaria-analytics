@@ -79,7 +79,6 @@ services:
       AIRFLOW_UID: ${AIRFLOW_UID}
       PYTHONPATH: /opt/airflow
 
-      # Banco Analytics
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_HOST: ${POSTGRES_HOST}
@@ -93,6 +92,7 @@ services:
       - ./plugins:/opt/airflow/plugins
       - ./logs:/opt/airflow/logs
       - ./config:/opt/airflow/config
+      - ./data:/opt/airflow/data
 
     command:
       - bash
@@ -138,7 +138,6 @@ services:
       AIRFLOW_UID: ${AIRFLOW_UID}
       PYTHONPATH: /opt/airflow
 
-      # Banco Analytics
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_HOST: ${POSTGRES_HOST}
@@ -152,6 +151,7 @@ services:
       - ./plugins:/opt/airflow/plugins
       - ./logs:/opt/airflow/logs
       - ./config:/opt/airflow/config
+      - ./data:/opt/airflow/data
 
     command:
       - airflow
@@ -185,7 +185,6 @@ services:
       AIRFLOW_UID: ${AIRFLOW_UID}
       PYTHONPATH: /opt/airflow
 
-      # Banco Analytics
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_HOST: ${POSTGRES_HOST}
@@ -199,6 +198,7 @@ services:
       - ./plugins:/opt/airflow/plugins
       - ./logs:/opt/airflow/logs
       - ./config:/opt/airflow/config
+      - ./data:/opt/airflow/data
 
     command:
       - airflow

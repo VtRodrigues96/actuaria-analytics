@@ -3,7 +3,7 @@ from sqlalchemy import text
 from src.database.connection import get_engine
 
 
-def transform_population():
+def transform_mortality():
 
     engine = get_engine()
 
@@ -13,20 +13,22 @@ def transform_population():
         state_code,
         sex,
         age_group,
-        population,
+        cause_code,
+        deaths,
         source
-    FROM bronze.population_raw;
+    FROM bronze.mortality_raw;
     """
 
     insert_query = """
-    INSERT INTO silver.population_clean
+    INSERT INTO silver.mortality_clean
     (
         reference_year,
         state_code,
         sex,
         age_min,
         age_max,
-        population,
+        cause_code,
+        deaths,
         source
     )
     VALUES
@@ -36,7 +38,8 @@ def transform_population():
         :sex,
         :age_min,
         :age_max,
-        :population,
+        :cause_code,
+        :deaths,
         :source
     )
     ON CONFLICT
@@ -45,7 +48,8 @@ def transform_population():
         state_code,
         sex,
         age_min,
-        age_max
+        age_max,
+        cause_code
     )
     DO NOTHING;
     """
@@ -60,20 +64,10 @@ def transform_population():
 
         for row in rows:
 
-            if "+" in row.age_group:
+            age_range = row.age_group.split("-")
 
-                age_min = int(
-                    row.age_group.replace("+", "")
-                )
-
-                age_max = None
-
-            else:
-
-                age_range = row.age_group.split("-")
-
-                age_min = int(age_range[0])
-                age_max = int(age_range[1])
+            age_min = int(age_range[0])
+            age_max = int(age_range[1])
 
             connection.execute(
                 text(insert_query),
@@ -83,7 +77,8 @@ def transform_population():
                     "sex": row.sex,
                     "age_min": age_min,
                     "age_max": age_max,
-                    "population": row.population,
+                    "cause_code": row.cause_code,
+                    "deaths": row.deaths,
                     "source": row.source
                 }
             )
@@ -91,6 +86,6 @@ def transform_population():
 
 if __name__ == "__main__":
 
-    transform_population()
+    transform_mortality()
 
-    print("Transformação Silver população finalizada.")
+    print("Transformação Silver mortalidade finalizada.")
