@@ -17,7 +17,9 @@ def get_indicators():
         age_max,
         population,
         mortality_rate,
-        expected_deaths
+        life_expectancy,
+        expected_deaths,
+        risk_level
 
     FROM gold.actuarial_indicators
 
