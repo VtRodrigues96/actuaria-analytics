@@ -10,7 +10,6 @@ def load_mortality_table():
 
     df = extract_mortality_table()
 
-
     insert_query = """
     INSERT INTO bronze.mortality_table_raw
     (
@@ -36,30 +35,66 @@ def load_mortality_table():
         age,
         sex
     )
-    DO NOTHING;
+
+    DO UPDATE SET
+
+        mortality_rate = EXCLUDED.mortality_rate,
+
+        life_expectancy = EXCLUDED.life_expectancy,
+
+        source = EXCLUDED.source,
+
+        ingestion_timestamp = EXCLUDED.ingestion_timestamp;
+
     """
+
+    processed = 0
 
 
     with engine.begin() as connection:
 
         for _, row in df.iterrows():
 
-            connection.execute(
+            result = connection.execute(
                 text(insert_query),
                 {
                     "age": int(row["age"]),
-                    "sex": row["sex"],
-                    "mortality_rate": row["mortality_rate"],
-                    "life_expectancy": row["life_expectancy"],
-                    "source": row["source"],
-                    "ingestion_timestamp": row["ingestion_timestamp"]
+
+                    "sex": str(row["sex"]),
+
+                    "mortality_rate": float(
+                        row["mortality_rate"]
+                    ),
+
+                    "life_expectancy": (
+                        float(row["life_expectancy"])
+                        if row["life_expectancy"] is not None
+                        else None
+                    ),
+
+                    "source": row.get(
+                        "source",
+                        "IBGE"
+                    ),
+
+                    "ingestion_timestamp": (
+                        row["ingestion_timestamp"]
+                    )
                 }
             )
 
 
+            processed += result.rowcount
+
+
+
     print(
-        f"Carga Bronze mortalidade IBGE finalizada: {len(df)} registros"
+        f"Carga Bronze mortalidade IBGE finalizada: {processed} registros processados"
     )
+
+
+    return processed
+
 
 
 if __name__ == "__main__":

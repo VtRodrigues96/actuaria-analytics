@@ -14,6 +14,14 @@ CREATE TABLE IF NOT EXISTS bronze.population_raw (
 
     source VARCHAR(50) DEFAULT 'IBGE',
 
-    ingestion_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ingestion_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT uq_population_raw_business_key
+        UNIQUE (
+            reference_year,
+            state_code,
+            sex,
+            age_group
+        )
 
 );

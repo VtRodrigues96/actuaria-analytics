@@ -1,3 +1,18 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Airflow
 logs/
-# Streamlit agent skills (environment-specific symlinks)
-.agents/skills/developing-with-streamlit
+
+# Windows
+*.Zone.Identifier
+*.lnk
+
+# IDE
+.vscode/
+.idea/
+
+# Agent environment
+.agents/

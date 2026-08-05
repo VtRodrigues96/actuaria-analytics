@@ -14,12 +14,10 @@ CREATE TABLE IF NOT EXISTS bronze.mortality_table_raw (
 
     ingestion_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-
     CONSTRAINT uq_mortality_table_business_key
-    UNIQUE
-    (
-        age,
-        sex
-    )
+        UNIQUE (
+            age,
+            sex
+        )
 
 );

@@ -34,31 +34,60 @@ def load_population():
     )
 
     ON CONFLICT
+    (
+        reference_year,
+        state_code,
+        sex,
+        age_group
+    )
+
     DO NOTHING;
     """
+
+
+    inserted = 0
 
 
     with engine.begin() as connection:
 
         for _, row in df.iterrows():
 
-            connection.execute(
+            result = connection.execute(
                 text(insert_query),
                 {
-                    "reference_year": int(row["reference_year"]),
+                    "reference_year": int(
+                        row["reference_year"]
+                    ),
+
                     "state_code": row["state_code"],
+
                     "sex": row["sex"],
+
                     "age_group": row["age_group"],
-                    "population": int(row["population"]),
+
+                    "population": int(
+                        row["population"]
+                    ),
+
                     "source": row["source"],
-                    "ingestion_timestamp": row["ingestion_timestamp"]
+
+                    "ingestion_timestamp": row[
+                        "ingestion_timestamp"
+                    ]
                 }
             )
 
 
+            inserted += result.rowcount
+
+
     print(
-        f"Carga Bronze população IBGE finalizada: {len(df)} registros"
+        f"Carga Bronze população IBGE finalizada: {inserted} registros novos inseridos"
     )
+
+
+    return inserted
+
 
 
 if __name__ == "__main__":

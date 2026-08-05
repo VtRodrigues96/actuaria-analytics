@@ -1,6 +1,38 @@
 import plotly.express as px
 
 
+def apply_layout(fig):
+
+    fig.update_layout(
+        template="plotly_white",
+        height=450,
+        margin=dict(
+            l=40,
+            r=40,
+            t=60,
+            b=40
+        ),
+        title_x=0.02,
+        font=dict(
+            size=13
+        ),
+        legend_title_text=""
+    )
+
+    return fig
+
+
+
+def br_number(value):
+
+    return (
+        f"{value:,.2f}"
+        .replace(",", "X")
+        .replace(".", ",")
+        .replace("X", ".")
+    )
+
+
 
 def mortality_by_age(df):
 
@@ -28,22 +60,38 @@ def mortality_by_age(df):
     )
 
 
+    mortality["mortality_percent"] = (
+        mortality["mortality_rate"]
+        *
+        100
+    )
+
+
     fig = px.line(
         mortality,
         x="age_group",
-        y="mortality_rate",
+        y="mortality_percent",
         markers=True,
+        text=[
+            f"{x:.2f}%"
+            for x in mortality["mortality_percent"]
+        ],
         title="Taxa de Mortalidade por Faixa Etária"
+    )
+
+
+    fig.update_traces(
+        textposition="top center"
     )
 
 
     fig.update_layout(
         xaxis_title="Faixa Etária",
-        yaxis_title="Taxa de Mortalidade"
+        yaxis_title="Mortalidade (%)"
     )
 
 
-    return fig
+    return apply_layout(fig)
 
 
 
@@ -79,7 +127,13 @@ def population_by_age(df):
         population,
         x="age_group",
         y="population",
-        title="População por Faixa Etária"
+        text_auto=True,
+        title="Distribuição Populacional por Faixa Etária"
+    )
+
+
+    fig.update_traces(
+        texttemplate="%{text}"
     )
 
 
@@ -89,7 +143,7 @@ def population_by_age(df):
     )
 
 
-    return fig
+    return apply_layout(fig)
 
 
 
@@ -125,7 +179,8 @@ def expected_cost_by_age(df):
         cost,
         x="age_group",
         y="expected_claim_cost",
-        title="Custo Esperado por Faixa Etária"
+        text_auto=True,
+        title="Custo Esperado de Sinistros por Faixa Etária"
     )
 
 
@@ -135,7 +190,7 @@ def expected_cost_by_age(df):
     )
 
 
-    return fig
+    return apply_layout(fig)
 
 
 
@@ -160,8 +215,14 @@ def risk_distribution(df):
         risk,
         names="risk_level",
         values="quantity",
-        title="Distribuição de Risco"
+        hole=0.35,
+        title="Distribuição dos Níveis de Risco"
     )
 
 
-    return fig
+    fig.update_traces(
+        textinfo="percent+label"
+    )
+
+
+    return apply_layout(fig)

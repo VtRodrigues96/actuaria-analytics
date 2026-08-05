@@ -8,11 +8,6 @@ import pendulum
 
 
 
-# =====================================================
-# CONFIGURAÇÕES
-# =====================================================
-
-
 local_tz = pendulum.timezone(
     "America/Sao_Paulo"
 )
@@ -33,11 +28,6 @@ default_args = {
 
 
 
-# =====================================================
-# CALLBACK
-# =====================================================
-
-
 def task_failure_callback(context):
 
     print("=" * 60)
@@ -50,10 +40,6 @@ def task_failure_callback(context):
 
 
 
-# =====================================================
-# DAG
-# =====================================================
-
 
 @dag(
 
@@ -64,13 +50,13 @@ def task_failure_callback(context):
     Pipeline atuarial utilizando arquitetura Medallion.
 
     Bronze:
-    Dados brutos IBGE
+        Dados brutos IBGE
 
     Silver:
-    Dados tratados e agrupados
+        Dados tratados e derivados
 
     Gold:
-    Indicadores atuariais
+        Indicadores atuariais
 
     """,
 
@@ -99,14 +85,13 @@ def task_failure_callback(context):
 )
 
 
-
 def actuaria_pipeline():
 
 
 
-    # =================================================
-    # DATABASE
-    # =================================================
+    # =====================================================
+    # DATABASE INITIALIZATION
+    # =====================================================
 
 
     @task(
@@ -114,9 +99,7 @@ def actuaria_pipeline():
     )
     def init_database():
 
-
         from sqlalchemy import text
-
         from src.database.connection import get_engine
 
 
@@ -132,11 +115,13 @@ def actuaria_pipeline():
 
             "01_create_schemas.sql",
 
-            "02_create_bronze.sql",
-
             "04_create_population_bronze.sql",
 
+            "06_create_mortality_table_bronze.sql",
+
             "02_create_silver_tables.sql",
+
+            "07_create_silver_mortality.sql",
 
             "09_create_silver_mortality_age_group.sql",
 
@@ -169,7 +154,6 @@ def actuaria_pipeline():
                 )
 
 
-
         print(
             "Banco inicializado"
         )
@@ -180,15 +164,20 @@ def actuaria_pipeline():
 
 
 
-    # =================================================
+
+    # =====================================================
     # BRONZE
-    # =================================================
+    # =====================================================
 
 
     with TaskGroup(
+
         group_id="bronze",
+
         tooltip="Camada Bronze"
+
     ) as bronze:
+
 
 
         @task(
@@ -214,19 +203,52 @@ def actuaria_pipeline():
 
 
 
+
+
+        @task(
+            task_id="load_mortality_table"
+        )
+        def load_mortality_table():
+
+
+            from src.bronze.load_mortality_table import (
+                load_mortality_table
+            )
+
+
+            result = load_mortality_table()
+
+
+            print(
+                "Bronze mortalidade IBGE concluído"
+            )
+
+
+            return result
+
+
+
+
         population = load_population()
 
 
+        mortality = load_mortality_table()
 
 
-    # =================================================
+
+
+
+    # =====================================================
     # SILVER
-    # =================================================
+    # =====================================================
 
 
     with TaskGroup(
+
         group_id="silver",
+
         tooltip="Camada Silver"
+
     ) as silver:
 
 
@@ -255,10 +277,36 @@ def actuaria_pipeline():
 
 
 
+
         @task(
             task_id="transform_mortality"
         )
         def transform_mortality():
+
+
+            from src.silver.transform_mortality import (
+                transform_mortality
+            )
+
+
+            result = transform_mortality()
+
+
+            print(
+                "Silver mortalidade base concluído"
+            )
+
+
+            return result
+
+
+
+
+
+        @task(
+            task_id="build_mortality_age_group"
+        )
+        def build_mortality_age_group():
 
 
             from src.silver.build_mortality_age_group import (
@@ -270,11 +318,12 @@ def actuaria_pipeline():
 
 
             print(
-                "Silver mortalidade concluído"
+                "Silver mortalidade faixa etária concluído"
             )
 
 
             return result
+
 
 
 
@@ -285,16 +334,27 @@ def actuaria_pipeline():
         mortality_clean = transform_mortality()
 
 
+        mortality_age_group = build_mortality_age_group()
 
 
-    # =================================================
+
+        mortality_clean >> mortality_age_group
+
+
+
+
+
+    # =====================================================
     # GOLD
-    # =================================================
+    # =====================================================
 
 
     with TaskGroup(
+
         group_id="gold",
+
         tooltip="Camada Gold"
+
     ) as gold:
 
 
@@ -326,9 +386,11 @@ def actuaria_pipeline():
             df = merge_tables()
 
 
+
             df = calculate_actuarial_indicators(
                 df
             )
+
 
 
             save_gold(
@@ -336,12 +398,16 @@ def actuaria_pipeline():
             )
 
 
+
             print(
                 f"Indicadores gerados: {len(df)}"
             )
 
 
+
             return len(df)
+
+
 
 
 
@@ -350,9 +416,11 @@ def actuaria_pipeline():
 
 
 
-    # =================================================
+
+
+    # =====================================================
     # QUALITY CHECK
-    # =================================================
+    # =====================================================
 
 
     @task(
@@ -392,6 +460,7 @@ def actuaria_pipeline():
 
         if count == 0:
 
+
             raise Exception(
                 "Gold sem registros"
             )
@@ -408,15 +477,15 @@ def actuaria_pipeline():
         )
 
 
-
         return count
 
 
 
 
-    # =================================================
-    # DEPENDÊNCIAS
-    # =================================================
+
+    # =====================================================
+    # DEPENDENCIES
+    # =====================================================
 
 
     database_ready >> bronze
