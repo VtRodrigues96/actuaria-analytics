@@ -4,7 +4,7 @@
 
 O **Actuaria Analytics** é uma solução de engenharia de dados voltada para processamento e análise de informações atuariais, utilizando uma arquitetura de pipeline automatizada baseada em **Apache Airflow**, **PostgreSQL**, **Docker** e **Streamlit**.
 
-O objetivo do projeto é construir um fluxo completo de dados, desde a ingestão dos dados brutos até a geração de indicadores atuariais consolidados para análise de mortalidade, população e risco.
+Do ponto de vista atuarial, o objetivo deste projeto é construir um fluxo completo de dados para transformar dados históricos de mortalidade e população em informações estruturadas capazes de apoiar a avaliação de riscos relacionados à longevidade e mortalidade. A análise permite identificar padrões de comportamento demográfico, variações de mortalidade por faixa etária e sexo, além de estimar indicadores utilizados em estudos atuariais, como taxas de mortalidade, expectativa de vida e exposição ao risco. Essas informações são fundamentais para auxiliar processos de tomada de decisão em áreas como seguros de vida, previdência, planejamento financeiro de longo prazo e gestão de riscos populacionais.
 
 A solução utiliza a arquitetura **Medallion Data Architecture**, separando o processamento em três camadas:
 
