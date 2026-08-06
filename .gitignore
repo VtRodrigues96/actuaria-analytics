@@ -4,7 +4,11 @@ __pycache__/
 *.pyc
 
 # Airflow
-logs/
+logs/*
+!logs/.gitkeep
+
+plugins/*
+!plugins/.gitkeep
 
 # Windows
 *.Zone.Identifier
